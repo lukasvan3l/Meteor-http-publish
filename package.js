@@ -1,7 +1,7 @@
 Package.describe({
-  name: 'cfs:http-publish',
+  name: 'q42:http-publish-with-auth',
   version: '0.0.0',
-  summary: 'Adds HTTP.publish and HTTP.unpublish RESTful'
+  summary: 'Adds HTTP.publish and HTTP.unpublish RESTful, with custom authentication'
 });
 
 Package.on_use(function(api) {
@@ -21,7 +21,7 @@ Package.on_use(function(api) {
 });
 
 Package.on_test(function (api) {
-  api.use('cfs:http-publish', ['client', 'server']);
+  api.use('q42:http-publish-with-auth', ['client', 'server']);
   api.use('test-helpers', ['client', 'server']);
   api.use('http', 'client');
 
