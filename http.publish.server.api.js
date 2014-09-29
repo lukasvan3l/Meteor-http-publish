@@ -29,7 +29,7 @@ var defaultAPIPrefix = '/api/';
  * @private
  * @param {Object} scope
  * @returns {httpPublishGetPublishScope.publishScope}
- * 
+ *
  * Creates a nice scope for the publish method
  */
 _publishHTTP.getPublishScope = function httpPublishGetPublishScope(scope) {
@@ -50,7 +50,7 @@ _publishHTTP.formatHandlers = {};
  * @private
  * @param {Object} result - The result object
  * @returns {String} JSON
- * 
+ *
  * Formats the output into JSON and sets the appropriate content type on `this`
  */
 _publishHTTP.formatHandlers.json = function httpPublishJSONFormatHandler(result) {
@@ -67,7 +67,7 @@ _publishHTTP.formatHandlers.json = function httpPublishJSONFormatHandler(result)
  * @param {Object} scope
  * @param {String} [defaultFormat='json'] - Default format to use if format is not in query string.
  * @returns {Any} The formatted result
- * 
+ *
  * Formats the result into the format selected by querystring eg. "&format=json"
  */
 _publishHTTP.formatResult = function httpPublishFormatResult(result, scope, defaultFormat) {
@@ -108,7 +108,7 @@ _publishHTTP.formatResult = function httpPublishFormatResult(result, scope, defa
  * @param {String} message - The message
  * @param {Object} scope
  * @returns {Any} The formatted result
- * 
+ *
  * Responds with error message in the expected format
  */
 _publishHTTP.error = function httpPublishError(statusCode, message, scope) {
@@ -123,7 +123,7 @@ _publishHTTP.error = function httpPublishError(statusCode, message, scope) {
  * @param {Meteor.Collection} collection - The Meteor.Collection instance
  * @param {String} methodName - The method name
  * @returns {Function} The server method
- * 
+ *
  * Returns the DDP connection handler, already setup and secured
  */
 _publishHTTP.getMethodHandler = function httpPublishGetMethodHandler(collection, methodName) {
@@ -143,14 +143,14 @@ _publishHTTP.getMethodHandler = function httpPublishGetMethodHandler(collection,
  * @private
  * @param {Array} names - List of method names to unpublish
  * @returns {undefined}
- * 
+ *
  * Unpublishes all HTTP methods that have names matching the given list.
  */
 _publishHTTP.unpublishList = function httpPublishUnpublishList(names) {
   if (!names.length) {
     return;
   }
-  
+
   // Carry object for methods
   var methods = {};
 
@@ -160,7 +160,7 @@ _publishHTTP.unpublishList = function httpPublishUnpublishList(names) {
   }
 
   HTTP.methods(methods);
-  
+
   // Remove the names from our list of currently published methods
   _publishHTTP.currentlyPublished = _.difference(_publishHTTP.currentlyPublished, names);
 };
@@ -170,26 +170,26 @@ _publishHTTP.unpublishList = function httpPublishUnpublishList(names) {
  * @private
  * @param {String|Meteor.Collection} [name] - The method name or collection
  * @returns {undefined}
- * 
- * Unpublishes all HTTP methods that were published with the given name or 
+ *
+ * Unpublishes all HTTP methods that were published with the given name or
  * for the given collection. Call with no arguments to unpublish all.
  */
 _publishHTTP.unpublish = function httpPublishUnpublish(/* name or collection, options */) {
-  
+
   // Determine what method name we're unpublishing
   var name = (arguments[0] instanceof Meteor.Collection) ?
           defaultAPIPrefix + arguments[0]._name : arguments[0];
-          
+
   // Unpublish name and name/id
   if (name && name.length) {
     _publishHTTP.unpublishList([name, name + '/:id']);
-  } 
-  
+  }
+
   // If no args, unpublish all
   else {
     _publishHTTP.unpublishList(_publishHTTP.currentlyPublished);
   }
-  
+
 };
 
 /**
@@ -197,7 +197,7 @@ _publishHTTP.unpublish = function httpPublishUnpublish(/* name or collection, op
  * @public
  * @param {Object} newHandlers
  * @returns {undefined}
- * 
+ *
  * Add publish formats. Example:
  ```js
  HTTP.publishFormats({
@@ -231,27 +231,27 @@ HTTP.publishFormats = function httpPublishFormats(newHandlers) {
  * @param {Function} [publishFunc] - A publish function. Required to mount GET restpoints.
  * @returns {undefined}
  * @todo this should use options argument instead of optional args
- * 
+ *
  * Publishes one or more restpoints, mounted on "name" ("/api/collectionName/"
  * by default). The GET restpoints are subscribed to the document set (cursor)
  * returned by the publish function you supply. The other restpoints forward
  * requests to Meteor's built-in DDP methods (insert, update, remove), meaning
  * that full allow/deny security is automatic.
- * 
+ *
  * __Usage:__
- * 
+ *
  * Publish only:
- * 
+ *
  * HTTP.publish({name: 'mypublish'}, publishFunc);
- * 
+ *
  * Publish and mount crud rest point for collection /api/myCollection:
- * 
+ *
  * HTTP.publish({collection: myCollection}, publishFunc);
- * 
+ *
  * Mount CUD rest point for collection and documents without GET:
- * 
+ *
  * HTTP.publish({collection: myCollection});
- * 
+ *
  */
 HTTP.publish = function httpPublish(options, publishFunc) {
   options = _.extend({
@@ -265,9 +265,9 @@ HTTP.publish = function httpPublish(options, publishFunc) {
     documentPut: true,
     documentDelete: true
   }, options || {});
-  
+
   var collection = options.collection;
-  
+
   // Use provided name or build one
   var name = (typeof options.name === "string") ? options.name : defaultAPIPrefix + collection._name;
 
@@ -275,7 +275,7 @@ HTTP.publish = function httpPublish(options, publishFunc) {
   if (typeof name !== "string") {
     throw new Error('HTTP.publish expected a collection or name option');
   }
-  
+
   var defaultFormat = options.defaultFormat;
 
   // Rig the methods for the CRUD interface
@@ -329,7 +329,7 @@ HTTP.publish = function httpPublish(options, publishFunc) {
 
     // We also add the findOne, update and remove methods
     methods[name + '/:id'] = {};
-    
+
     if (options.documentGet && publishFunc) {
       // We have to have a publish method inorder to publish id? The user could
       // just write a publish all if needed - better to make this explicit
@@ -350,13 +350,15 @@ HTTP.publish = function httpPublish(options, publishFunc) {
           var result;
 
           // Check to see if document is in published cursor
-          cursor.forEach(function(doc) {
-            if (!result) {
-              if (doc._id === mongoId) {
-                result = doc;
+          if (cursor) {
+            cursor.forEach(function(doc) {
+              if (!result) {
+                if (doc._id === mongoId) {
+                  result = doc;
+                }
               }
-            }
-          });
+            });
+          }
 
           // If the document is found the return
           if (result) {
@@ -402,7 +404,7 @@ HTTP.publish = function httpPublish(options, publishFunc) {
 
         } else {
           return _publishHTTP.error(400, { error: 'Method expected a document id' }, this);
-        }      
+        }
       };
     }
 
@@ -428,7 +430,7 @@ HTTP.publish = function httpPublish(options, publishFunc) {
 
         } else {
           return _publishHTTP.error(400, { error: 'Method expected a document id' }, this);
-        }     
+        }
       };
     }
 
@@ -446,10 +448,10 @@ HTTP.publish = function httpPublish(options, publishFunc) {
 
   // Publish the methods
   HTTP.methods(methods);
-  
+
   // Mark these method names as currently published
   _publishHTTP.currentlyPublished = _.union(_publishHTTP.currentlyPublished, _.keys(methods));
-  
+
 }; // EO Publish
 
 /**
@@ -457,8 +459,8 @@ HTTP.publish = function httpPublish(options, publishFunc) {
  * @public
  * @param {String|Meteor.Collection} [name] - The method name or collection
  * @returns {undefined}
- * 
- * Unpublishes all HTTP methods that were published with the given name or 
+ *
+ * Unpublishes all HTTP methods that were published with the given name or
  * for the given collection. Call with no arguments to unpublish all.
  */
 HTTP.unpublish = _publishHTTP.unpublish;
